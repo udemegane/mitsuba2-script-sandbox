@@ -93,28 +93,32 @@ if not os.path.isdir(path):
 scene = make_scene(path_str, 8);
 fsize = scene.sensors()[0].film().size()
 image_ref = render(scene)
-write_bitmap(path + "out_ref.exr", image_ref, fsize)
-print("Writing " + path + "out_ref_ver2.exr")
+from mitsuba.core import Bitmap, Struct
+bitmap_tmp = Bitmap('/home/udemegane/mitsuba2/docs/testscripts/output/optim_face/out_ref.exr', Bitmap.FileFormat.OpenEXR).convert(Bitmap.PixelFormat.RGB, Struct.Type.Float32, srgb_gamma=False)
+image_ref = np.array(bitmap_tmp).flatten()
+#write_bitmap(path + "out_ref_origin.exr", image_ref, fsize)
+#print("Writing " + path + "out_ref_ver2.exr")
 
 # Define the differentiable scene for the optimization
 
 del scene
-scene = make_scene(path_reparam_str, 3);
+scene = make_scene(path_reparam_str, 7);
 
 properties = traverse(scene)
 
 key = "object.vertex_positions"
 properties.keep([key])
 print(properties[key])
-initial_positions = properties[key] + Vector3f(0.5,0.5,0.5)
+initial_positions = properties[key]
 
-P_translation = Vector3f(0.0);
+P_translation = initial_positions
+print(P_translation)
 ek.set_requires_gradient(P_translation)
 
 params_optim = {"P_translation": P_translation}
 
 # Instantiate an optimizer
-opt = SGD(params_optim, lr=5.0, momentum=0.5)
+opt = SGD(params_optim, lr=0.5, momentum=0.5)
 
 for i in range(100):
 

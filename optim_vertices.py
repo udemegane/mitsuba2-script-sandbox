@@ -2,7 +2,7 @@ import numpy as np
 import os
 import mitsuba
 import enoki as ek
-
+import numpy as np
 import random
 mts_variant = 'rgb'
 mitsuba.set_variant('gpu_autodiff_' + mts_variant)
@@ -104,8 +104,14 @@ print(properties[key])
 properties.keep([key])
 
 # Add an offset from target positions
-offset = random.uniform(-1, 1)
-properties[key] += offset
+npoffset = np.array(properties[key])
+npoffset += [[random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0), 0],
+             [random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0), 0],
+             [random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0), 0],
+             [random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0), 0]
+             ]
+
+properties[key] = npoffset
 properties.update()
 
 print("Initial positions:")

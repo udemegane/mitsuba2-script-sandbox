@@ -15,6 +15,7 @@ from mitsuba.python.autodiff import render, write_bitmap, SGD
 
 path = "output/optim_pose/"
 
+
 def make_scene(integrator, spp):
     return load_string("""
         <?xml version="1.0"?>
@@ -63,10 +64,10 @@ def make_scene(integrator, spp):
 
             <shape type="obj" id="planemesh">
                 <string name="filename" value="data/meshes/xy_plane.obj"/>
-                
+
                 <bsdf type="diffuse" id="planemat">
                 </bsdf>
-                
+
                 <transform name="to_world">
                     <translate z="-1"/>
                     <scale value="2.0"/>
@@ -75,13 +76,14 @@ def make_scene(integrator, spp):
         </scene>
     """.format(integrator=integrator, spp=spp))
 
+
 # Define integrators for this test
 
-path_str =  """<integrator type="path">
+path_str = """<integrator type="path">
                    <integer name="max_depth" value="2"/>
                </integrator>"""
 
-path_reparam_str =  """<integrator type="pathreparam">
+path_reparam_str = """<integrator type="pathreparam">
                            <integer name="max_depth" value="2"/>
                        </integrator>"""
 
@@ -90,7 +92,7 @@ if not os.path.isdir(path):
 
 # Render the target image
 
-scene = make_scene(path_str, 3);
+scene = make_scene(path_str, 8);
 fsize = scene.sensors()[0].film().size()
 image_ref = render(scene)
 write_bitmap(path + "out_ref.exr", image_ref, fsize)
@@ -105,7 +107,7 @@ properties = traverse(scene)
 
 key = "object.vertex_positions"
 properties.keep([key])
-initial_positions = properties[key] + Vector3f(0.5,0.5,0.5)
+initial_positions = properties[key] + Vector3f(0.1, 0.3, 0.1)
 
 P_translation = Vector3f(0.0);
 ek.set_requires_gradient(P_translation)
@@ -116,13 +118,12 @@ params_optim = {"P_translation": P_translation}
 opt = SGD(params_optim, lr=5.0, momentum=0.5)
 
 for i in range(100):
-
-    # Update the scene 
+    # Update the scene
     print("P_translation: ", params_optim["P_translation"])
     properties[key] = Transform4f.translate(params_optim["P_translation"]).transform_point(initial_positions);
     properties.update()
 
-    image = render(scene, spp=1)
+    image = render(scene)
 
     image_np = image.numpy().reshape(fsize[1], fsize[0], 3)
     output_file = path + 'out_%03i.exr' % i
@@ -130,7 +131,7 @@ for i in range(100):
     Bitmap(image_np).write(output_file)
 
     # Objective function
-    loss = ek.hsum(ek.hsum(ek.sqr(image - image_ref))) / (fsize[1]*fsize[0]*3)
+    loss = ek.hsum(ek.hsum(ek.sqr(image - image_ref))) / (fsize[1] * fsize[0] * 3)
     print("Iteration %i: loss=%f" % (i, loss[0]))
 
     ek.backward(loss)
