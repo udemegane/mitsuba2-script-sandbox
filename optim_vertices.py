@@ -91,6 +91,7 @@ print("Writing " + path + "out_ref.exr")
 
 # Define the differentiable scene for the optimization
 
+
 del scene
 scene = make_scene(path_reparam_str, 2);
 
@@ -128,6 +129,7 @@ for i in range(iterations):
 
     image_np = image.numpy().reshape(fsize[1], fsize[0], 3)
     output_file = path + 'out_%03i.exr' % i
+    write_bitmap('out_plane/out_%03i.png' % i, image, fsize)
     print("Writing image %s" % (output_file))
     Bitmap(image_np).write(output_file)
 
