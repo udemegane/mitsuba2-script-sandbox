@@ -18,10 +18,10 @@ from mitsuba.python.autodiff import render, write_bitmap, SGD, Adam
 # This test optimizes a colorful texture from a reference image.
 for ptn in range(3):
     for ptn_ref in range(10):
-        obj_name = ["Sphere_125", "Sphere_100", "Sphere_8000"]
-        obj_ref_name = ["kunekune", "ExCylinder", "Cylinder", "Ear", "core", "Gun", "s08", "n25", "a03", "SweepProfile"]
+        obj_name = ["Sphere_2197",  "Sphere_100", "Sphere_125"]
+        obj_ref_name = ["Ear", "core", "Gun", "s08", "n25", "a03", "SweepProfile", "kunekune", "ExCylinder", "Cylinder"]
         obj_path = "/home/udemegane/3DCG/Objects/3D objects/obj/" + obj_name[ptn] + ".OBJ"
-        path = "output/optim_" + obj_ref_name[ptn_ref] + "/"
+        path = "/home/udemegane/Documents/LabProjects/output/optim_" + obj_ref_name[ptn_ref] + "/"
 
         if not os.path.isdir(path):
             os.makedirs(path)
@@ -167,7 +167,7 @@ for ptn in range(3):
                 df = pd.read_csv(csv_file, index_col=0)
                 for i, dat in df.iteritems():
                     # x軸がindex(時間)、y軸が書くデータの値
-                    plt.plot(dat, df.index, label=i)
+                    plt.plot(df.index, dat, label=i)
 
                     # 書くデータの描画が終わったら、タイトルと凡例を追加
                 plt.title(finaloutputpath + obj_name[ptn] + "_to_" + obj_ref_name[ptn_ref])
