@@ -13,12 +13,12 @@ mitsuba.set_variant('gpu_autodiff_' + mts_variant)
 from mitsuba.core import Transform4f, Bitmap, Float, Vector3f, Struct
 from mitsuba.core.xml import load_string
 from mitsuba.python.util import traverse
-from mitsuba.python.autodiff import render, write_bitmap, SGD, Adam, MyOpt
+from mitsuba.python.autodiff import render, write_bitmap, SGD, Adam
 
 # This test optimizes a colorful texture from a reference image.
 # ref_model
-ptn = 4
-ptn_ref = 10
+ptn = 2
+ptn_ref = 6
 
 obj_name = ["Sphere_2197", "Sphere_100", "Sphere_125", "Sphere_2197_big", "face_ver2"]
 obj_ref_name = ["Ear", "core", "Gun", "s08", "n25", "a03", "SweepProfile", "kunekune", "ExCylinder", "Cylinder", "face"]
@@ -64,7 +64,8 @@ for ite in range(1):
                                    <spectrum name="radiance" value="100"/>
                                </emitter>
                             </shape>
-                                <shape type="obj" id="object">
+                            
+                            <shape type="obj" id="object">
                                 <string name="filename" value=""" + "\"" + obj_path + "\"" + """/>
                                 <bsdf type="diffuse" id="objectmat">
                                 </bsdf>
@@ -160,7 +161,7 @@ for ite in range(1):
     fsize = scene.sensors()[0].film().size()
 
     # Road the ref image
-    img_ref_name = obj_ref_name[ptn_ref] + "_ref" + ".exr"
+    img_ref_name = obj_ref_name[ptn_ref] + "_ref_ver1" + ".exr"
     bitmap_tmp = Bitmap(path + img_ref_name, Bitmap.FileFormat.OpenEXR).convert(Bitmap.PixelFormat.RGB,
                                                                                 Struct.Type.Float32,
                                                                                 srgb_gamma=False)
@@ -175,10 +176,10 @@ for ite in range(1):
     print("list of properties:")
     print(properties)
 
-    key = "object.vertex_positions"
+    key = "object.vertex_positions_buf"
     properties.keep([key])
     print("selected property value")
-    print(properties[key])
+    print(properties["object.vertex_positions_buf"])
     # Instantiate an optimizer
     lr = [1, 5, 10, 16, 15, 25, 40]
     momentum = [0.01, 0.05, 0.1, 0.3, 0.25, 0.5, 0.75]
@@ -191,8 +192,8 @@ for ite in range(1):
 
     opt1 = Adam(properties, lr=.05)
     opt2 = SGD(properties, lr=lr[n - 1], momentum=momentum[m - 1])
-    opt3 = MyOpt(properties, lr=lr[n - 1])
-    opt = opt3
+    #opt3 = MyOpt(properties, lr=lr[n - 1])
+    opt = opt1
     l = 0.000000001
 
     for i in range(100):
