@@ -75,6 +75,7 @@ print("Write " + output_path + "out_ref.exr")
 # Reset texture data to a constant
 disp_tex_params = traverse(disp_tex)
 disp_tex_params.keep(['data'])
+# Reset
 disp_tex_params['data'] = ek.full(Float, 0.25, len(disp_tex_params['data']))
 disp_tex_params.update()
 
@@ -88,11 +89,11 @@ for it in range(iterations):
     # Perform a differentiable rendering of the scene
     image = render(scene,
                    optimizer=opt,
-                   spp=2,
+                   spp=1,
                    unbiased=True,
                    pre_render_callback=apply_displacement)
 
-    write_bitmap(output_path + 'out_%03i.exr' % it, image, crop_size)
+    write_bitmap(output_path + 'out_%03i.png' % it, image, crop_size)
 
     # Objective: MSE between 'image' and 'image_ref'
     ob_val = ek.hsum(ek.sqr(image - image_ref)) / len(image)

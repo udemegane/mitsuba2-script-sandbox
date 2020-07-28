@@ -82,7 +82,7 @@ width   = 150
 height  = 150
 spp_ref = 64
 spp_opt = 4
-out_dir = Path("./out")
+out_dir = Path("/home/udemegane/Documents/LabProjects/output/plane")
 out_dir.mkdir(parents=True, exist_ok=True)
 
 # Generate the reference scene and image
@@ -101,7 +101,6 @@ vertex_pos_key = 'sheet.vertex_positions_buf'
 params = traverse(scene)
 params.keep([vertex_pos_key])
 print("Parameter map after filtering: ", params)
-
 #
 vertex_positions_buf = params[vertex_pos_key]
 vertex_positions = ravel(vertex_positions_buf)
