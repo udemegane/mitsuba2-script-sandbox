@@ -49,6 +49,7 @@ opt = Adam(params_optim, lr=0.02)
 
 # Apply the transformation to mesh vertex position and update scene (e.g. Optix BVH)
 def apply_transformation():
+    print(params_optim)
     trasfo = Transform4f.translate(params_optim["translate"])
     new_positions = trasfo.transform_point(positions_initial)
     unravel(new_positions, params['object.vertex_positions_buf'])
@@ -72,7 +73,7 @@ for it in range(iterations):
     # Perform a differentiable rendering of the scene
     image = render(scene,
                    optimizer=opt,
-                   spp=4,
+                   spp=2,
                    unbiased=True,
                    pre_render_callback=apply_transformation)
 

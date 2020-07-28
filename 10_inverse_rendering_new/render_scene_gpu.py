@@ -12,7 +12,7 @@ from mitsuba.python.autodiff import render, write_bitmap, Adam
 
 mitsuba_path = "/home/udemegane/mitsuba2_optix7/"
 scene_folder = "exp_invert_vertex"
-scene_name = "itr.xml"
+scene_name = "itr_sphere.xml"
 
 # Convert flat array into a vector of arrays (will be included in next enoki release)
 def ravel(buf, dim = 3):

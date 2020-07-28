@@ -65,7 +65,6 @@ def apply_displacement(amplitude = 0.05):
 
 # Apply displacement before generating reference image
 apply_displacement()
-
 # Render a reference image (no derivatives used yet)
 image_ref = render(scene, spp=3)
 crop_size = scene.sensors()[0].film().crop_size()
@@ -75,6 +74,7 @@ print("Write " + output_path + "out_ref.exr")
 # Reset texture data to a constant
 disp_tex_params = traverse(disp_tex)
 disp_tex_params.keep(['data'])
+
 # Reset
 disp_tex_params['data'] = ek.full(Float, 0.25, len(disp_tex_params['data']))
 disp_tex_params.update()
