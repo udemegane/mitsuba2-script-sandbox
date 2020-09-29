@@ -1,4 +1,6 @@
-import os
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
+import localpath as lp
 import time
 import numpy as np
 import enoki as ek
@@ -26,7 +28,8 @@ def unravel(source, target, dim = 3):
         ek.scatter(target, source[i], dim * idx + i)
 
 # Prepare output folder
-output_path = "output/invert_vertex/"
+output_path = lp.output_path_base + os.path.basename(__file__)
+
 if not os.path.isdir(output_path):
     os.makedirs(output_path)
 
@@ -39,8 +42,8 @@ scene_ref = xml.load_file(scene_folder + 'exp_test1.xml')
 # Load a reference image (no derivatives used yet)
 crop_size = scene.sensors()[0].film().crop_size()
 bitmap_tmp = Bitmap(output_path + img_ref_name, Bitmap.FileFormat.OpenEXR).convert(Bitmap.PixelFormat.RGB,
-                                                                            Struct.Type.Float32,
-                                                                            srgb_gamma=False)
+                                                                                   Struct.Type.Float32,
+                                                                                   srgb_gamma=False)
 image_ref = np.array(bitmap_tmp).flatten()
 image_ref = render(scene_ref, spp=6)
 crop_size_ref = scene_ref.sensors()[0].film().crop_size()
