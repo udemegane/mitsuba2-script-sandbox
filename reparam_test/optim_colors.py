@@ -13,7 +13,7 @@ from mitsuba.python.autodiff import render, write_bitmap, SGD
 
 # This test optimizes a colorful texture from a reference image.
 
-path = "output/optim_colors/"
+path = "../output/optim_colors/"
 
 def make_scene(integrator, spp):
     return load_string("""
