@@ -13,7 +13,7 @@ from mitsuba.render import SurfaceInteraction3f
 from mitsuba.python.util import traverse
 from mitsuba.python.autodiff import render, write_bitmap, Adam
 
-mitsuba_path = "/home/udemegane/mitsuba2_optix7/"
+mitsuba_path = "/home/udemegane/mitsuba2/"
 img_ref_name = "out_ref.exr"
 
 # Convert flat array into a vector of arrays (will be included in next enoki release)
