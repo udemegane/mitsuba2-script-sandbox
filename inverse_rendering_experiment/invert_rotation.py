@@ -10,37 +10,15 @@ from mitsuba.render import SurfaceInteraction3f
 from mitsuba.python.util import traverse
 from mitsuba.python.autodiff import render, write_bitmap, Adam
 
-def ravel(buf, dim = 3):
-    idx = dim * UInt32.arange(ek.slices(buf) // dim)
-    if dim == 2:
-        return Vector2f(ek.gather(buf, idx), ek.gather(buf, idx + 1))
-    elif dim == 3:
-        return Vector3f(ek.gather(buf, idx), ek.gather(buf, idx + 1), ek.gather(buf, idx + 2))
-
-# Return contiguous flattened array (will be included in next enoki release)
-def unravel(source, target, dim = 3):
-    idx = UInt32.arange(ek.slices(source))
-    for i in range(dim):
-        ek.scatter(target, source[i], dim * idx + i)
-
-def initialize(scene_name, ref_name):
-    output_path = 'output/' + os.path.splitext(os.path.basename(__file__))[0] + '/'
-    image_ref = '../data/refimages/' + ref_name
-    scene_folder = '../data/xml/' + scene_name
-    scene_folder = '../../../../resources/data/docs/examples/invert_heightfield/'
-    if not os.path.isdir(output_path):
-        os.makedirs(output_path)
-    Thread.thread().file_resolver().append(scene_folder)
-    scene = xml.load_file(scene_folder + 'scene.xml')
-
-    return scene, output_path
+from invert import ravel, unravel, initialize
 
 if __name__ == "__main__":
-    vals = initialize('invert_heightfield', 'heigthfield_ref')
+    vals = initialize('invert_heightfield', 'heigthfield_ref', os.path.splitext(os.path.basename(__file__))[0])
     scene = vals[0]
     output_path = vals[1]
     #image_ref = vals[2]
     params = traverse(scene)
+    print(params)
 
     positions_buf = params['grid_mesh.vertex_positions_buf']
     positions_initial = ravel(positions_buf)
@@ -73,8 +51,8 @@ if __name__ == "__main__":
     # Render a reference image (no derivatives used yet)
     image_ref = render(scene, spp=32)
     crop_size = scene.sensors()[0].film().crop_size()
-    write_bitmap(output_path + 'out_ref.exr', image_ref, crop_size)
-    print("Write " + output_path + "out_ref.exr")
+    write_bitmap('../data/refimages/' + 'out_ref.exr', image_ref, crop_size)
+    print("Write " + '../data/refimages/' + "out_ref.exr")
 
     # Reset texture data to a constant
     disp_tex_params = traverse(disp_tex)
