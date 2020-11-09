@@ -33,24 +33,23 @@ Thread.thread().file_resolver().append(scene_folder)
 scene = xml.load_file(scene_folder + 'scene.xml')
 
 params = traverse(scene)
+
 positions_buf = params['object.vertex_positions_buf']
 positions_initial = ravel(positions_buf)
-
+print(positions_initial)
+reflectance_initial = params['object.bsdf.reflectance.value']
 # Create differential parameter to be optimized
-translate_ref = Vector3f(0.0)
-axis_x = Vector3f(1.0, 0.0, 0.0)
-axis_y = Vector3f(0.0, 1.0, 0.0)
 
-axis_z = Vector3f(0.0, 0.0, 1.0)
+translate_ref = Vector3f(0.0)
+axis = Vector3f(0.0, 1.0, 0.0)
 angle_ref = Float(0.0)
+reflectance_ref = Vector3f(0.2, 0.3, 0.5)
 
 # Create a new ParameterMap (or dict)
 params_optim = {
     "translate" : translate_ref,
     "angle" : angle_ref,
-    "angle_x" : angle_ref,
-    "angle_y" : angle_ref,
-    "angle_z" : angle_ref,
+    "reflectance" : reflectance_ref,
 }
 
 # Construct an Adam optimizer that will adjust the translation parameters
@@ -58,10 +57,13 @@ opt = Adam(params_optim, lr=1)
 
 # Apply the transformation to mesh vertex position and update scene (e.g. Optix BVH)
 def apply_transformation():
-    trasfo = Transform4f.rotate(axis_z, params_optim["angle"])
+    print(params_optim)
+    trasfo = Transform4f.rotate(axis, params_optim["angle"])
     new_positions = trasfo.transform_point(positions_initial)
+    #params['object.bsdf.reflectance.value'] = params_optim["reflectance"]
     unravel(new_positions, params['object.vertex_positions_buf'])
     params.set_dirty('object.vertex_positions_buf')
+    #params.set_dirty('object.bsdf.reflectance.value')
     params.update()
 
 # Render a reference image (no derivatives used yet)
@@ -71,8 +73,11 @@ crop_size = scene.sensors()[0].film().crop_size()
 write_bitmap(output_path + 'out_ref.exr', image_ref, crop_size)
 print("Write " + output_path + "out_ref.exr")
 
+
+
 # Move object before starting the optimization process
 params_optim["angle"] = Float(45.0)
+#params_optim["reflectance"] = Vector3f(1.0, 0.0, 0.0)
 
 time_a = time.time()
 
@@ -84,7 +89,7 @@ for it in range(iterations):
     # Perform a differentiable rendering of the scene
     image = render(scene,
                    optimizer=opt,
-                   spp=2,
+                   spp=3,
                    unbiased=True,
                    pre_render_callback=apply_transformation)
 

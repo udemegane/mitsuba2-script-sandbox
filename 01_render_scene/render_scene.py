@@ -1,15 +1,20 @@
 import os
 import numpy as np
 import mitsuba
-
+import enoki as ek
 # Set the desired mitsuba variant
-mitsuba.set_variant('scalar_rgb')
+mitsuba.set_variant('gpu_autodiff_rgb')
 
 from mitsuba.core import Bitmap, Struct, Thread
 from mitsuba.core.xml import load_file
 
+from mitsuba.core import Float, Thread
+from mitsuba.core.xml import load_file
+from mitsuba.python.util import traverse
+from mitsuba.python.autodiff import render, write_bitmap, Adam
+import time
 # Absolute or relative path to the XML file
-filename = '/home/udemegane/mitsuba2/docs/testscripts/10_inverse_rendering/cbox/cbox.xml'
+filename = '/home/udemegane/mitsuba2/resources/data/docs/examples/invert_rotate/' + 'scene.xml'
 
 # Add the scene directory to the FileResolver's search path
 Thread.thread().file_resolver().append(os.path.dirname(filename))
@@ -18,21 +23,6 @@ Thread.thread().file_resolver().append(os.path.dirname(filename))
 scene = load_file(filename)
 
 # Call the scene's integrator to render the loaded scene
-scene.integrator().render(scene, scene.sensors()[0])
-
-# After rendering, the rendered data is stored in the film
-film = scene.sensors()[0].film()
-print(type(film))
-# Write out rendering as high dynamic range OpenEXR file
-film.set_destination_file('/home/udemegane/mitsuba2/docs/testscripts/01_render_scene/out.exr')
-film.develop()
-print(type(film))
-
-# Write out a tonemapped JPG of the same renderingane
-bmp = film.bitmap(raw=True)
-bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True).write('/home/udemegane/mitsuba2/docs/testscripts/01_render_scene/out.png')
-
-# Get linear pixel values as a numpy array for further processing
-bmp_linear_rgb = bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.Float32, srgb_gamma=False)
-image_np = np.array(bmp_linear_rgb)
-print(image_np.shape)
+image_ref = render(scene, spp=32)
+crop_size = scene.sensors()[0].film().crop_size()
+write_bitmap('/home/udemegane/mitsuba2/docs/examples/testprojects/data/output/face.png', image_ref, crop_size)

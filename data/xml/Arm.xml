@@ -1,0 +1,65 @@
+<scene version="2.1.0">
+
+    <integrator type="pathreparam">
+        <integer name="max_depth" value="3"/>
+    </integrator>
+
+    <sensor type="perspective">
+        <transform name="to_world">
+            <lookat origin="5, 2, 0" target="0, 0, 0" up="0, 1, 0"/>
+        </transform>
+
+        <float name="fov" value="35"/>
+
+        <film type="hdrfilm">
+            <integer name="width" value="128"/>
+            <integer name="height" value="128"/>
+        </film>
+
+        <sampler type="independent">
+            <integer name="sample_count" value="8"/>
+        </sampler>
+    </sensor>
+
+    <shape type="rectangle">
+        <transform name="to_world">
+            <rotate x="1" angle="180"/>
+            <translate x="10.0" y="10.0" z="10.0"/>
+        </transform>
+        <emitter type="smootharea">
+            <spectrum name="radiance" value="1500"/>
+        </emitter>
+    </shape>
+
+
+
+    <texture type="bitmap" id="Arm_basecolor">
+        <string name="filename" value="../tex/BrokenArm_default_Albedo.jpg"/>
+    </texture>
+
+
+
+    <shape type="obj" id="object">
+        <string name="filename" value="../meshes/Arm.obj"/>
+        <bsdf type="diffuse" id="defaultMat">
+            <ref name="reflectance" id="Arm_basecolor"/>
+        </bsdf>
+    </shape>
+
+    <shape type="obj" id="planemesh">
+        <string name="filename" value="../meshes/smooth_ramp.obj"/>
+        <transform name="to_world">
+            <scale value="0.5"/>
+            <translate y="-1"/>
+        </transform>
+
+        <bsdf type="diffuse">
+            <texture name="reflectance" type="checkerboard">
+                <transform name="to_uv">
+                    <scale x="5" y="5"/>
+                </transform>
+            </texture>
+        </bsdf>
+    </shape>
+
+</scene>
