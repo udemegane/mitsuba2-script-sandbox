@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/home/udemegane/mitsuba2/build/dist/python')
 import os
 import time
 import enoki as ek
@@ -9,8 +11,6 @@ from mitsuba.core import Thread, xml, UInt32, Float, Vector2f, Vector3f, Transfo
 from mitsuba.render import SurfaceInteraction3f
 from mitsuba.python.util import traverse
 from mitsuba.python.autodiff import render, write_bitmap, Adam
-
-mitsuba_path = "/home/udemegane/mitsuba2/"
 
 # Convert flat array into a vector of arrays (will be included in next enoki release)
 def ravel(buf, dim = 3):
@@ -32,7 +32,7 @@ if not os.path.isdir(output_path):
     os.makedirs(output_path)
 
 # Load example scene
-scene_folder = mitsuba_path + '/resources/data/docs/examples/invert_heightfield/'
+scene_folder = '../advanced_inverse_rendering/data/invert_heightfield/'
 Thread.thread().file_resolver().append(scene_folder)
 scene = xml.load_file(scene_folder + 'scene.xml')
 
@@ -65,8 +65,9 @@ def apply_displacement(amplitude = 0.05):
 
 # Apply displacement before generating reference image
 apply_displacement()
+
 # Render a reference image (no derivatives used yet)
-image_ref = render(scene, spp=3)
+image_ref = render(scene, spp=4)
 crop_size = scene.sensors()[0].film().crop_size()
 write_bitmap(output_path + 'out_ref.exr', image_ref, crop_size)
 print("Write " + output_path + "out_ref.exr")
@@ -74,8 +75,6 @@ print("Write " + output_path + "out_ref.exr")
 # Reset texture data to a constant
 disp_tex_params = traverse(disp_tex)
 disp_tex_params.keep(['data'])
-
-# Reset
 disp_tex_params['data'] = ek.full(Float, 0.25, len(disp_tex_params['data']))
 disp_tex_params.update()
 
@@ -89,11 +88,11 @@ for it in range(iterations):
     # Perform a differentiable rendering of the scene
     image = render(scene,
                    optimizer=opt,
-                   spp=1,
+                   spp=2,
                    unbiased=True,
                    pre_render_callback=apply_displacement)
 
-    write_bitmap(output_path + 'out_%03i.png' % it, image, crop_size)
+    write_bitmap(output_path + 'out_%03i.exr' % it, image, crop_size)
 
     # Objective: MSE between 'image' and 'image_ref'
     ob_val = ek.hsum(ek.sqr(image - image_ref)) / len(image)

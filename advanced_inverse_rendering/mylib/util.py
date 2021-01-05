@@ -6,11 +6,8 @@ import mitsuba
 mitsuba.set_variant('gpu_autodiff_rgb')
 
 from mitsuba.core import Thread, xml, UInt32, Struct, Float, Vector2f, Vector3f, Bitmap, Transform4f, ScalarTransform4f
-from mitsuba.render import SurfaceInteraction3f
-from mitsuba.python.util import traverse
-from mitsuba.python.autodiff import render, write_bitmap, Adam
 from collections import namedtuple
-
+from typing import Any, List, Tuple, Union
 class EasyDict(dict):
     """Convenience class that behaves like a dict but allows access with the attribute syntax."""
 
