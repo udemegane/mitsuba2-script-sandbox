@@ -37,3 +37,4 @@ def unravel(source, target, dim = 3):
     idx = UInt32.arange(ek.slices(source))
     for i in range(dim):
         ek.scatter(target, source[i], dim * idx + i)
+

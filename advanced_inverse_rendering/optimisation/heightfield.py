@@ -13,8 +13,7 @@ from mitsuba.python.autodiff import render, write_bitmap, Adam
 from mylib.util import ravel, unravel
 
 
-def optimisation(args, scene):
-    params = traverse(scene)
+def optimisation(args, scene, params):
     positions_buf = params['grid_mesh.vertex_positions_buf']
     positions_initial = ravel(positions_buf)
     normals_initial = ravel(params['grid_mesh.vertex_normals_buf'])
@@ -89,4 +88,3 @@ def optimisation(args, scene):
 
     print()
     print('%f ms per iteration' % (((time_b - time_a) * 1000) / args.iter))
-

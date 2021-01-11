@@ -7,7 +7,7 @@ mitsuba.set_variant('gpu_autodiff_rgb')
 
 # import mitsuba c++ modules
 from mitsuba.core import xml, Thread
-
+from mitsuba.python.util import traverse
 # import mitsuba python modules
 from mitsuba.python.autodiff import render, write_bitmap
 
@@ -20,13 +20,13 @@ def run(args):
     scene = xml.load_file(args.scene_dir + 'scene.xml')
     if not os.path.exists(args.out):
         os.makedirs(args.out)
-
+    params = traverse(scene)
     # image_raw = render(scene, args.spp)
     # crop_size = scene.sensors()[0].film().crop_size()
     # write_bitmap(args.out + args.scene.split('.')[0] + '.png', image_raw, crop_size)
     # print('Write ' + args.out + args.scene.split('.')[0] + '.png')
     if args.script + '.py' in os.listdir('./optimisation'):
-        eval(args.script + '.optimisation')(args, scene)
+        eval(args.script + '.optimisation')(args, scene, params)
     else:
         print('Error: Invalid scripts "' + args.script + '"')
 
